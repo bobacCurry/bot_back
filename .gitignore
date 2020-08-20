@@ -1,0 +1,9 @@
+node_modules/
+
+static/
+
+log/
+
+.env
+
+yarn.lock
