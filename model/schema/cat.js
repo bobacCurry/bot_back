@@ -4,7 +4,7 @@ const Schema = mongoose.Schema
 
 const CatSchema = new Schema({
 	// 分类名称 多语言
-	text: { type: Object, default: {} },
+	text: { type: String, default: '' },
 	// 标签
 	tags: { type: Array, default:[], index: true },
 	// 语言版本
