@@ -12,7 +12,7 @@ module.exports = {
 
 		if (!data || !data.account || !data.name || !data.password || !data.account.trim() || !data.name.trim() || !data.password.trim()) {
       
-	      	return res.send({ code: 0, msg: '注册信息不完整' })
+	      	return res.send({ success: false, msg: '注册信息不完整' })
 	    }
 
 	    const { account, name, password, job }  =  data
@@ -75,7 +75,7 @@ module.exports = {
 
 	      	await db_user.findByIdAndUpdate(user._id,{ password: md5(data.new_password.trim()) })
 
-	      	return res.send({ code: 1, msg: '密码修改成功' })
+	      	return res.send({ success: true, msg: '密码修改成功' })
 
 	    }catch(err){
 
