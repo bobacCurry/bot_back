@@ -11,6 +11,8 @@ const BotSchema = new Schema({
 	token: { type: String, required: true, unique: true },
 	// 机器人类型
 	type: { type: String, index: true },
+	// 回调域名
+	cburl: { type: String, required: true },
 
 	status: { type: Number, default:1 },
 
@@ -20,7 +22,6 @@ const BotSchema = new Schema({
 },
 {
 	versionKey: false, timestamps: { createdAt:'created_at',updatedAt:'updated_at' }
-
 })
 
 module.exports = mongoose.model('bot', BotSchema,'bot')
