@@ -14,7 +14,7 @@ const router = require('./router')
 
 const log = require('./middleware/error_log')
 
-const PORT = 8888
+const PORT = 8899
 
 const config = require('./config.js')
 
