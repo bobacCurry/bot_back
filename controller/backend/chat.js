@@ -22,7 +22,7 @@ module.exports = {
 		}
 		if (conditions.type && conditions.keywords){
 			let regexp=new RegExp(conditions.keywords,'i')
-			if(['tags', 'keywords'].includes(conditions.type)) {
+			if(['keywords'].includes(conditions.type)) {
 				_conditions[conditions.type] = {$elemMatch:{$regex:regexp}}
 			}else if(['title','description','username','type','lang'].includes(conditions.type)){
 				_conditions[conditions.type] = {$regex:regexp}

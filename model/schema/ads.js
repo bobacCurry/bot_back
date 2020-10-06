@@ -10,7 +10,7 @@ const AdsSchema = new Schema({
 	// 点击次数
 	count: { type: Number, default: 0 },
 	// 广告状态
-	status: { type: Boolean, default: true },
+	status: { type: Number, default:0 },
 	// 上次展示时间
 	last_show: { type: Number, default:0 },
 	// 广告结束时间

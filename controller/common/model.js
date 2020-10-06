@@ -65,7 +65,7 @@ exports.updateData = function (model, conditions, update, options) {
 
 	return new Promise((resolve, reject) => {
 
-		model.update(conditions, update, options, (error, results) => {
+		model.updateMany(conditions, update, options, (error, results) => {
 
 			if (error) {
 

@@ -11,14 +11,12 @@ const ChatSchema = new Schema({
 	username: { type: String, required: true, index: true },
 	// 类型 supergroup channel
 	type: { type: String, default: 'supergroup' },
-	// 标签
-	tags: { type: Array, default:[], index: true },
 	// 成员数量
 	member_count: { type: Number, default: 0 },
 	// 语言
 	lang: { type: String, default: 'cn', index: true },
 	// 权重
-	score: { type: Number, default: 0 },
+	score: { type: Number, default: 0, index: true },
 	// 广告关键词
 	keywords: { type: Array, default:[], index: true },
 	// 广告结束时间
