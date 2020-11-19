@@ -1,5 +1,3 @@
-const Model = require('../common/model')
-
 const db_chat = require('../../model/schema/chat.js')
 
 const { update_document, delete_document, search_document } = require('../../search/index')
@@ -8,9 +6,10 @@ const { get_mention, check_mention, record_mention } = require('../updates/searc
 
 const { LANGLIST } = require('../../config')
 
-const { page_helper, change_local_date, key_array } = require('../common/helpers')
+const { key_array } = require('../common/helpers')
 
 module.exports = {
+
 	chat_get_list: async (req, res, next) => {
 
 		const { lang, keyword, page, size } = req.body
