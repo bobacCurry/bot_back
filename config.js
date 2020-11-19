@@ -4,6 +4,8 @@ let env = fs.readFileSync('./.env', 'utf-8') // 环境配置
 
 env = JSON.parse(env)
 
-let bot_api = "https://api.telegram.org/bot"
+let BOTAPI = "https://api.telegram.org/bot"
+//语言列表
+let LANGLIST = ['cn','en']
 
-module.exports = { env, bot_api }
+module.exports = { env, BOTAPI, LANGLIST }

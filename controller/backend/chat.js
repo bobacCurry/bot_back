@@ -2,142 +2,149 @@ const Model = require('../common/model')
 
 const db_chat = require('../../model/schema/chat.js')
 
-const jwt = require('../../middleware/check_token')
+const { update_document, delete_document, search_document } = require('../../search/index')
 
-const { page_helper, change_local_date } = require('../common/helpers')
+const { get_mention, check_mention, record_mention } = require('../updates/search/mention')
+
+const { LANGLIST } = require('../../config')
+
+const { page_helper, change_local_date, key_array } = require('../common/helpers')
 
 module.exports = {
 	chat_get_list: async (req, res, next) => {
 
-		let { page = 1, size = 10, conditions = {} } = req.body
+		const { lang, keyword, page, size } = req.body
 
-		let page_info = page_helper(page, size);
+		if (!lang){
 
-		let _conditions = {}
-		if (conditions.date && conditions.date[0] && conditions.date[1]){
-			_conditions.created_at = {
-				"$lte": conditions.date[1],
-				"$gte":conditions.date[0],
-			}
+			return res.send({ success:false, msg: '请选择搜索语言'})
 		}
-		if (conditions.type && conditions.keywords){
-			let regexp=new RegExp(conditions.keywords,'i')
-			if(['keywords'].includes(conditions.type)) {
-				_conditions[conditions.type] = {$elemMatch:{$regex:regexp}}
-			}else if(['title','description','username','type','lang'].includes(conditions.type)){
-				_conditions[conditions.type] = {$regex:regexp}
-			}else{
-				_conditions[conditions.type] = conditions.keywords
-			}
+
+		if (!keyword){
+
+			return res.send({ success:false, msg: '请选择搜索关键词'})
 		}
-		let find_fields = {}
 
-		let find_options = {
-			skip:page_info.skip,
-			limit:page_info.limit,
-			sort: {_id: -1}
+		if (!page){
+
+			return res.send({ success:false, msg: '请选择搜索页码'})
 		}
-		let chat_list = await Model.findData(db_chat,_conditions,find_fields,find_options).then((result)=>{
-			return result
-		}).catch(err => {
-			return next(new Error(err))
-		})
-		chat_list = change_local_date(chat_list)
 
-		let chat_count = await Model.countData(db_chat,_conditions).then((result)=>{
-			return result
-		}).catch(err => {
-			return next(new Error(err))
-		})
+		if (!size){
 
-		return res.send({ success: true, chat_list: chat_list, chat_count: chat_count })
+			return res.send({ success:false, msg: '请选择搜索条数'})
+		}
 
+		try {
+
+			const { hits } = await search_document(lang, 'chat', keyword, page, size)
+
+			let chat_list = key_array('_source',hits.hits),
+				chat_count = hits.total.value
+
+			return res.send({ success: true, chat_list: chat_list, chat_count: chat_count })
+
+		}catch(err){
+
+			return res.send({ success:false, msg: err.error.reason })
+		}
 	},
 
 	chat_create: async (req, res, next) => {
 
-		let data = req.body
+		let { username, token } = req.body
 
-		Model.addData(db_chat,data).then((result)=>{
+		if (!username||!token){
 
-			return res.send({ success: true, data: result, msg: '创建成功' })
-
-		}).catch(err => {
-
-			return next(new Error(err))
-
-		})
-
-	},
-
-	chat_edit: async (req, res, next) => {
-
-		let data = req.body
-
-		let conditions = {
-			_id: data._id
+			return res.send({ success:false, msg: '参数缺失'})
 		}
 
-		let options = {
-			new: true
-		}
-		let return_data = await Model.findOneAndUpdateData(db_chat, conditions, data, options).then((result)=>{
+		const record = await get_mention(username)
 
-			return change_local_date(result.toObject())
+		let msg = ''
 
-		}).catch(err => {
+		if (record){
 
-			return next(new Error(err))
+			msg = `链接：<a href="https://t.me/${record.username}">${record.username}</a>\n类型：${record.type==='supergroup'?'群组':'频道'}\n所属语种：${record.lang}\n标题：${record.title}\n简介：${record.description}\n成员数：${record.member_count}`
 
-		})
+		}else{
 
-		return res.send({ success: true, data: return_data, msg: '修改成功' })
+			try {
 
-	},
+				const get_chat = await check_mention(token,username)
 
-	chat_status_change: async (req, res, next) => {
+				await record_mention(token,get_chat.result)
 
-		let { id_list, status } = req.body
+				msg = '添加索引成功'
 
-		let conditions = {
-			_id: id_list
-		}
-		let update = {
-			status: status
-		}
-		let options = {
-			multi: true
+			}catch(err){
+
+				// msg = '添加索引失败'
+
+				return res.send({ success:false, msg: err.error.reason }).status(500)
+
+			}
 		}
 
-		Model.updateData(db_chat, conditions, update , options).then((result)=>{
-
-			return res.send({ success: true, msg: '修改成功' })
-
-		}).catch(err => {
-
-			return next(new Error(err))
-
-		})
-
+		return res.send({ success: true, msg: msg })
 	},
 
 	chat_remove: async (req, res, next) => {
 
-		let data = req.body
+		const { lang, id } =  req.body
 
-		let conditions = {
-			_id: data.id
+		if (!lang||!id){
+
+			return res.send({ success:false, msg: '参数缺失' })
 		}
 
-		Model.removeData(db_chat, conditions).then((result)=>{
+		try{
 
-			return res.send({ success: true, msg: '已删除' })
+			await db_chat.findByIdAndDelete(id)
 
-		}).catch(err => {
+			await delete_document(lang, 'chat', id)
 
-			return next(new Error(err))
+			return res.send({ success:true, msg: '删除成功' })
 
-		})
+		}catch(err){
+
+			return res.send({ success:false, msg: err.error.reason })
+		}
+	},
+
+	chat_edit: async (req, res, next) => {
+
+		const { id, title, description, username, type, member_count, lang, score, keywords, end_at } =  req.body
+
+		if (!id||!title||!username||!type||!lang){
+
+			return res.send({ success:false, msg: '参数缺失' })
+		}
+
+		if(LANGLIST.indexOf(lang)===-1){
+
+			return res.send({ success:false, msg: '不存在该类型语言' })
+		}
+
+		try{
+
+			const chat = await db_chat.findByIdAndUpdate(id,{ title, description, username, type, member_count, lang, score, keywords, end_at })
+
+			if(!chat){
+
+				return res.send({ success:false, msg: '更新失败，未找到相关群信息' })
+			}
+
+			const doc = { id, title, description, username, type, member_count, score, keywords }
+
+			await update_document(lang,'chat',doc)
+
+			return res.send({ success: true, data: doc, msg: '修改成功' })
+
+		}catch(err){
+
+			return res.send({ success:false, msg: err.error.reason })
+		}
 
 	}
 }

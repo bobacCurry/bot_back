@@ -52,7 +52,22 @@ const helper = {
 
 		}
 
+	},
+
+	key_array: (key, arr) => {
+
+		let res = []
+
+		arr.forEach((item)=>{
+
+			res.push(item[key])
+
+		})
+
+		return res
+
 	}
+
 }
 
 module.exports = helper;
