@@ -1,5 +1,7 @@
 const db_chat = require('../../model/schema/chat.js')
 
+const jwt = require('../../middleware/check_token')
+
 const { update_document, delete_document, search_document } = require('../../search/index')
 
 const { get_mention, check_mention, record_mention } = require('../updates/search/mention')

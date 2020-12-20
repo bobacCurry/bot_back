@@ -4,12 +4,10 @@ const Schema = mongoose.Schema
 
 const BotSchema = new Schema({
 
-	name: { type: String, required: true },
-
 	username: { type: String, required: true, unique: true },
 
 	token: { type: String, required: true, unique: true },
-	// 机器人类型
+	// 机器人类型 search、bulter、backup 等
 	type: { type: String, index: true },
 	// 回调域名
 	cburl: { type: String, required: true },

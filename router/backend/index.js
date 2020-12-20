@@ -10,7 +10,7 @@ module.exports = function(app) {
 
 	app.use('/backend', require('./order'))
 
-	app.use('/backend', require('./cburl'))
+	app.use('/backend', require('./global_order'))
 
 	app.use('/backend', require('./menu'))
 

@@ -95,32 +95,6 @@ module.exports = {
 
 	},
 
-	ads_status_change: async (req, res, next) => {
-
-		let { id_list, status } = req.body
-
-		let conditions = {
-			_id: id_list
-		}
-		let update = {
-			status: status
-		}
-		let options = {
-			multi: true
-		}
-
-		Model.updateData(db_ads, conditions, update , options).then((result)=>{
-
-			return res.send({ success: true, msg: '修改成功' })
-
-		}).catch(err => {
-
-			return next(new Error(err))
-
-		})
-
-	},
-
 	ads_remove: async (req, res, next) => {
 
 		let data = req.body
@@ -140,4 +114,5 @@ module.exports = {
 		})
 
 	}
+
 }

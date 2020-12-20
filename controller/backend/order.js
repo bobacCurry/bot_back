@@ -1,5 +1,3 @@
-const mongoose = require('mongoose')
-
 const Model = require('../common/model')
 
 const db_order = require('../../model/schema/order.js')
