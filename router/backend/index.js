@@ -14,4 +14,6 @@ module.exports = function(app) {
 
 	app.use('/backend', require('./menu'))
 
+	app.use('/backend', require('./filter'))
+
 }
